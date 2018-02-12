@@ -75,7 +75,6 @@ int main(int nargs, char *vargs[])
   Matrix A = initTensorMatrices(uA, vA);
   Matrix B = initTensorMatrices(uB, vB);
 
-  setProdMatMat(naive);
   std::chrono::time_point < std::chrono::system_clock > start, end;
   start = std::chrono::system_clock::now();
   Matrix C = A * B;
@@ -91,93 +90,6 @@ int main(int nargs, char *vargs[])
     }
   else
     std::cout << "Test failed\n";
-
-  setProdMatMat(parallel_naive);
-  for ( int nbTh = 2; nbTh <= 16; nbTh *= 2 ) {
-    setNbThreads( nbTh );
-    start = std::chrono::system_clock::now();
-    Matrix C = A * B;
-    end = std::chrono::system_clock::now();
-    elapsed_seconds = end - start;
-
-    bool isPassed = verifProduct(uA, vA, uB, vB, C);
-    if (isPassed)
-    {
-      std::cout << "Test passed\n";
-      std::cout << "Temps CPU produit matrice-matrice parallel naif avec " << nbTh << " threads : "
-		<< elapsed_seconds.count() << " secondes\n";
-      std::cout << "MFlops -> " << (2.*dim*dim*dim)/elapsed_seconds.count()/1000000 <<std::endl;
-    }
-    else
-      std::cout << "Test failed for parallel naive with " << nbTh << " threads !\n";    
-  }
-  
-  setProdMatMat(block);
-  for ( int szBlk = 32; szBlk <= 256; szBlk *= 2 ) {
-    setBlockSize( szBlk );
-    start = std::chrono::system_clock::now();
-    C = A * B;
-    end = std::chrono::system_clock::now();
-    elapsed_seconds = end - start;
-
-    isPassed = verifProduct(uA, vA, uB, vB, C);
-    if (isPassed)
-      {
-	std::cout << "Test passed\n";
-	std::cout << "Temps CPU produit matrice-matrice bloc avec bloc taille " << szBlk
-		  << " : " << elapsed_seconds.count() << " secondes\n";
-	std::cout << "MFlops -> " << (2.*dim*dim*dim)/elapsed_seconds.count()/1000000 <<std::endl;
-      }
-    else
-      std::cout << "Test failed for block product\n";
-  }
-  
-  setProdMatMat(parallel_block1);
-  for ( int szBlk = 32; szBlk <= 256; szBlk *= 2 ) {
-    setBlockSize( szBlk );
-
-    start = std::chrono::system_clock::now();
-    Matrix C = A * B;
-    end = std::chrono::system_clock::now();
-    elapsed_seconds = end - start;
-
-    bool isPassed = verifProduct(uA, vA, uB, vB, C);
-    if (isPassed) {
-      std::cout << "Test passed\n";
-      std::cout << "Temps CPU produit matrice-matrice parallel bloc 1 avec bloc taille " << szBlk << " : "
-		<< elapsed_seconds.count() << " secondes\n";
-      std::cout << "MFlops -> " << (2.*dim*dim*dim)/elapsed_seconds.count()/1000000 <<std::endl;
-    }
-    else
-      std::cout << "Test failed for parallel bloc 1!\n";    
-  }
-
-  setProdMatMat(parallel_block2);
-  for ( int szBlk = 32; szBlk <= 256; szBlk *= 2 ) {
-    setBlockSize( szBlk );
-    for ( int nbTh = 2; nbTh <= 16; nbTh *= 2 ) {
-      setNbThreads( nbTh );
-
-      start = std::chrono::system_clock::now();
-      Matrix C = A * B;
-      end = std::chrono::system_clock::now();
-      elapsed_seconds = end - start;
-
-      bool isPassed = verifProduct(uA, vA, uB, vB, C);
-      if (isPassed) {
-	std::cout << "Test passed\n";
-	std::cout << "Temps CPU produit matrice-matrice parallel bloc 2 avec " << nbTh
-		  << " threads et bloc taille " << szBlk << " : "
-		  << elapsed_seconds.count() << " secondes\n";
-	std::cout << "MFlops -> " << (2.*dim*dim*dim)/elapsed_seconds.count()/1000000 <<std::endl;
-      }
-      else
-	{
-	  std::cout << "Test failed for parallel naive with " << nbTh << " threads !\n";
-	  exit(-1);
-	}
-    }
-  }
 
   return (isPassed ? EXIT_SUCCESS : EXIT_FAILURE);
 }
