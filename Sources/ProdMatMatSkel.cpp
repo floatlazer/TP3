@@ -22,6 +22,7 @@ static void naive_prodMatMat( const Matrix& A, const Matrix& B, Matrix& C  )
 
 static void ompnaive_prodMatMat( const Matrix& A, const Matrix& B, Matrix& C  )
 {
+
 }
 
 static int sizeBlock = 32;

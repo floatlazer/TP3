@@ -1,6 +1,6 @@
 CXX = g++ -std=c++11
 LIBS = -lm -lpthread
-CFLAGS = -Ilodepng -O3 -march=native # -fopenmp
+CFLAGS = -Ilodepng  -fopenmp  -O1 -march=native
 
 OBJS = Matrix.o TestProduct.o ProdMatMat.o
 OBJS2= dotproduct.o

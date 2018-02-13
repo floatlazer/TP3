@@ -7,6 +7,7 @@
 # include <cassert>
 # include <exception>
 # include <chrono>
+# include <stdexcept>
 # include "Vecteur.hpp"
 using namespace Algebra;
 

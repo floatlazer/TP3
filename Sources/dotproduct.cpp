@@ -3,21 +3,46 @@
 # include <string>
 # include <iostream>
 # include <chrono>
+# include <mutex>
+# include <thread>
+# include <algorithm>
 
 double dot( std::vector<double>& u, std::vector<double>& v )
 {
   assert(u.size() == v.size());
   double scal = 0.;
-  for ( size_t i = 0; i < u.size(); ++i ) {
-    scal += u[i]*v[i];
+//# pragma omp parallel for reduction(+:scal)
+  int nb_threads = std::thread::hardware_concurrency();
+  std::vector<std::thread> th;
+  std::mutex reduc_mutex;
+  th.reserve(nb_threads);
+  int sz_loc = u.size()/nb_threads;
+
+  for(int t = 0; t < nb_threads; ++t)
+  {
+    th.push_back(std::thread([=, &reduc_mutex, &scal]()
+    {
+      double scal_loc = 0.;
+      for(size_t i = sz_loc*t; i < std::min(sz_loc*(t+1), int(u.size())); ++i)
+      {
+        scal_loc += u[i]*v[i];
+      }
+      reduc_mutex.lock();
+      scal += scal_loc;
+      reduc_mutex.unlock();
+    }));
   }
+  for(auto& t : th) t.join();
+ // for ( size_t i = 0; i < u.size(); ++i ) {
+ //   scal += u[i]*v[i];
+ // }
   return scal;
 }
 
 int main( int nargs, char* vargs[])
 {
   std::chrono::time_point<std::chrono::system_clock> start, end;
-  int N = 1023;
+  int N = 1024;
   int nbSamples = 1024;
   if (nargs > 1) {
     nbSamples = std::stoi(vargs[1]);
